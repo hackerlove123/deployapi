@@ -9,7 +9,7 @@ RUN apt update -y && apt install -y --no-install-recommends \
     bash curl git htop speedtest-cli python3-pip \
     && pip3 install requests python-telegram-bot pytz --break-system-packages \
     && npm install -g npm@latest \ 
-    && npm install hpack https commander colors socks \
+    && npm install hpack https commander colors socks axios \
     && npm install express \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
