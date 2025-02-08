@@ -1,4 +1,5 @@
 https://daudau.org/api/http.txt
+https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&country=all&protocol=https&proxy_format=ipport&format=text&timeout=2000
 https://free-proxy-list.net/
 https://www.us-proxy.org/
 https://free-proxy-list.net/uk-proxy.html
