@@ -18,7 +18,7 @@ RUN apt update -y && apt install -y --no-install-recommends \
 COPY . .
 
 # Expose port 8080
-EXPOSE 8080
+EXPOSE 80
 
 # Run tất cả các file cần thiết khi container khởi động
 CMD bash -c "node api.js || tail -f /dev/null & python3 prxscan.py -l list.txt || tail -f /dev/null"
